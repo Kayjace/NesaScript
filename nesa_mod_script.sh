@@ -322,16 +322,14 @@ get_linux_info() {
     disk_avail=$(df -h --total | grep total | awk '{print $4}')
 
     gpu_info=$(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader,nounits 2>/dev/null)
-      if [ -n "$gpu_info" ]; then
+    if [ -n "$gpu_info" ]; then
         NODE_GPU=$(echo "$gpu_info" | awk -F', ' '{print $1}')
         NODE_GPU_COUNT=$(echo "$gpu_info" | wc -l)
         NODE_VRAM=$(echo "$gpu_info" | awk -F', ' '{total += $2} END {print total " MB"}')
-    gpu_count=$(lspci | grep -i -e '3D controller' -e 'VGA compatible controller' | grep -i -e nvidia -e amd | wc -l | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-    
-    gpu_memory=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | awk '{total += $1} END {print total " MB"}')
-    
-    if [ -z "$gpu_memory" ]; then
-        gpu_memory=$(lshw -C display 2>/dev/null | grep -i size | awk '{print $2 " " $3}' | head -n 1)
+    else
+        NODE_GPU="NA"
+        NODE_GPU_COUNT="0"
+        NODE_VRAM="NA"
     fi
 
     NODE_OS="Linux $version"
